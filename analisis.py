@@ -1,12 +1,34 @@
 """Clasificación de opiniones mediante LangChain y Gemini."""
 
+from typing import Literal
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import BaseModel, ConfigDict, Field
 
 from configuracion import ConfiguracionIA, cargar_configuracion_ia
 
 
 PROMPT_VERSION = "1.0"
+Sentimiento = Literal["positivo", "negativo", "neutro", "mixto"]
+
+
+class AnalisisOpinion(BaseModel):
+    """Contrato estructurado producido por el clasificador."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    es_pertinente: bool = Field(
+        description="Indica si el texto opina sobre el jugador seleccionado."
+    )
+    sentimiento: Sentimiento | None = Field(
+        description="Categoría de la opinión; nulo cuando no es pertinente."
+    )
+    razon: str = Field(
+        min_length=1,
+        max_length=300,
+        description="Justificación breve, en español y redactada en tercera persona.",
+    )
 
 REGLAS_BASE = """
 Eres un sistema de análisis de opiniones de aficionados sobre futbolistas.
