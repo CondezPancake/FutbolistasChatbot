@@ -30,8 +30,18 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
     jugadores_por_id = {jugador["id"]: jugador for jugador in jugadores}
 
     with st.sidebar:
-        st.header("⚽ Tribuna Global IA")
-        st.caption("Cada opinión juega su partido.")
+        st.markdown(
+            """
+            <div class="tg-brand">
+              <div class="tg-brand__mark" aria-hidden="true">TG</div>
+              <div>
+                <div class="tg-brand__name">Tribuna Global</div>
+                <div class="tg-brand__tag">Inteligencia futbolera</div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         jugador_id = st.selectbox(
             "Futbolista",
             options=list(jugadores_por_id),
@@ -42,6 +52,23 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
         )
 
     return jugadores_por_id[jugador_id]
+
+
+def mostrar_encabezado() -> None:
+    """Presenta la identidad principal del producto."""
+    st.markdown(
+        """
+        <section class="tg-hero">
+          <span class="tg-kicker">Análisis de percepción futbolística</span>
+          <h1>La conversación también se juega.</h1>
+          <p>
+            Comparte tu lectura sobre las figuras del fútbol mundial y obtén
+            una clasificación clara, breve y centrada en tus palabras.
+          </p>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def main() -> None:
@@ -61,8 +88,7 @@ def main() -> None:
 
     jugador_seleccionado = seleccionar_jugador(jugadores)
 
-    st.title("Tribuna Global IA")
-    st.caption("Cada opinión juega su partido.")
+    mostrar_encabezado()
     st.info(
         "Futbolista seleccionado: "
         f"**{jugador_seleccionado['nombre']}** · {jugador_seleccionado['pais']}"
