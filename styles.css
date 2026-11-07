@@ -50,6 +50,21 @@
   border-color: var(--tg-accent);
 }
 
+[data-testid="stSelectbox"] label p {
+  color: var(--tg-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+button:focus-visible,
+[role="combobox"]:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(32, 199, 122, 0.48) !important;
+  outline-offset: 3px;
+}
+
 .tg-brand {
   display: flex;
   align-items: center;
@@ -176,4 +191,45 @@
   color: var(--tg-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.72rem;
+}
+
+@media (max-width: 768px) {
+  .main .block-container {
+    padding: 2.5rem 1.1rem 6rem;
+  }
+
+  .tg-hero {
+    padding-top: 0.5rem;
+  }
+
+  .tg-hero h1 {
+    font-size: clamp(2.15rem, 12vw, 3.25rem);
+  }
+
+  .tg-hero p {
+    font-size: 0.96rem;
+    line-height: 1.6;
+  }
+
+  .tg-player {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .tg-player__body {
+    min-width: 0;
+  }
+
+  .tg-player__id {
+    margin-left: 3.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
