@@ -121,6 +121,25 @@ def mostrar_jugador_actual(jugador: dict[str, Any]) -> None:
     )
 
 
+def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
+    """Construye la entrada visual de la experiencia conversacional."""
+    mostrar_encabezado()
+    mostrar_jugador_actual(jugador)
+    st.markdown(
+        """
+        <section class="tg-view-intro">
+          <span class="tg-view-intro__eyebrow">Emitir opinión</span>
+          <h2>¿Qué lectura tienes de su juego?</h2>
+          <p>
+            En el siguiente paso podrás escribir una opinión y conversar con
+            Tribuna Global IA sin mezclarla con comentarios anteriores.
+          </p>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main() -> None:
     """Configura la página inicial de la aplicación."""
     st.set_page_config(
@@ -140,8 +159,10 @@ def main() -> None:
 
     jugador_seleccionado = seleccionar_jugador(jugadores)
 
-    mostrar_encabezado()
-    mostrar_jugador_actual(jugador_seleccionado)
+    if st.session_state.vista_activa == Vista.EMITIR.value:
+        mostrar_vista_emitir(jugador_seleccionado)
+    else:
+        st.info("La vista de consulta se añadirá a continuación.")
 
 
 if __name__ == "__main__":
