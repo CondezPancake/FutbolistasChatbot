@@ -25,7 +25,23 @@ No confundas mixto con neutro. La ausencia de elogios no implica una crítica y
 la ausencia de críticas no implica una valoración positiva.
 """.strip()
 
-MENSAJE_SISTEMA = "\n\n".join([REGLAS_BASE, CRITERIOS_SENTIMIENTO])
+CRITERIOS_PERTINENCIA = """
+Determina primero la pertinencia:
+
+- Es pertinente si el texto expresa una opinión o descripción sobre el jugador
+  seleccionado, aunque no repita su nombre.
+- No es pertinente si trata principalmente de otro tema, solicita una tarea
+  ajena o no constituye una opinión sobre el jugador seleccionado.
+- Un texto no pertinente no debe convertirse en una opinión neutra.
+
+Mantén esta coherencia: si es pertinente, asigna una categoría de sentimiento;
+si no es pertinente, el sentimiento debe ser nulo. En ambos casos explica la
+decisión de forma breve.
+""".strip()
+
+MENSAJE_SISTEMA = "\n\n".join(
+    [REGLAS_BASE, CRITERIOS_SENTIMIENTO, CRITERIOS_PERTINENCIA]
+)
 
 MENSAJE_HUMANO = """
 Jugador seleccionado:
