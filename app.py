@@ -1,5 +1,6 @@
 """Punto de entrada de la aplicación Tribuna Global IA."""
 
+from enum import Enum
 from html import escape
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,20 @@ from almacenamiento import ErrorCatalogo, cargar_jugadores
 DIRECTORIO_PROYECTO = Path(__file__).resolve().parent
 RUTA_JUGADORES = DIRECTORIO_PROYECTO / "data" / "jugadores.json"
 RUTA_ESTILOS = DIRECTORIO_PROYECTO / "styles.css"
+
+
+class Vista(str, Enum):
+    """Secciones principales disponibles en la interfaz."""
+
+    EMITIR = "Emitir opinión"
+    CONSULTAR = "Consultar opiniones"
+
+
+def inicializar_estado_interfaz() -> None:
+    """Garantiza una vista válida aunque cambie el estado de la sesión."""
+    vistas_validas = {vista.value for vista in Vista}
+    if st.session_state.get("vista_activa") not in vistas_validas:
+        st.session_state.vista_activa = Vista.EMITIR.value
 
 
 def cargar_estilos() -> None:
@@ -105,6 +120,7 @@ def main() -> None:
         initial_sidebar_state="expanded",
     )
     cargar_estilos()
+    inicializar_estado_interfaz()
 
     try:
         jugadores = cargar_catalogo_aplicacion()
