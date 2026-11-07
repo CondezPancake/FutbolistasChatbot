@@ -12,7 +12,23 @@ El repositorio contiene la estructura base, la configuración reproducible, los
 datos ficticios requeridos, el selector validado de futbolistas y la identidad
 visual responsive. La navegación separa la emisión de opiniones de la consulta
 persistente. El chat ya conserva mensajes durante la sesión; la clasificación
-con Gemini y el guardado definitivo se implementarán en las siguientes actividades.
+cuenta con un prompt versionado y seguro. La conexión con Gemini, la salida
+estructurada y el guardado definitivo se implementarán en las siguientes actividades.
+
+## Prompt de clasificación
+
+`analisis.py` define un `ChatPromptTemplate` con mensajes `system` y `human`.
+La versión `1.0` establece:
+
+- criterios explícitos para positivo, negativo, neutro y mixto;
+- pertinencia evaluada antes del sentimiento;
+- sentimiento nulo para mensajes no pertinentes;
+- interpretación prudente de negaciones e ironía;
+- razón breve, en tercera persona y sin hechos inventados;
+- tratamiento de la opinión como datos no confiables.
+
+La opinión se delimita dentro del mensaje humano y nunca se incorpora al mensaje
+del sistema. Esta etapa construye el prompt, pero todavía no consume la API.
 
 ## Conversación de sesión
 
