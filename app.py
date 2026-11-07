@@ -22,11 +22,30 @@ class Vista(str, Enum):
     CONSULTAR = "Consultar opiniones"
 
 
+MENSAJE_BIENVENIDA = {
+    "role": "assistant",
+    "content": (
+        "Selecciona un futbolista y comparte tu opinión. "
+        "Analizaré únicamente el mensaje que envíes."
+    ),
+    "tipo": "bienvenida",
+    "jugador_id": None,
+    "jugador_nombre": None,
+}
+
+
+def crear_historial_inicial() -> list[dict[str, Any]]:
+    """Crea un historial nuevo sin compartir referencias mutables."""
+    return [MENSAJE_BIENVENIDA.copy()]
+
+
 def inicializar_estado_interfaz() -> None:
     """Garantiza una vista válida aunque cambie el estado de la sesión."""
     vistas_validas = {vista.value for vista in Vista}
     if st.session_state.get("vista_activa") not in vistas_validas:
         st.session_state.vista_activa = Vista.EMITIR.value
+    if not isinstance(st.session_state.get("historial_chat"), list):
+        st.session_state.historial_chat = crear_historial_inicial()
 
 
 def cargar_estilos() -> None:
