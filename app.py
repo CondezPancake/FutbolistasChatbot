@@ -1,5 +1,6 @@
 """Punto de entrada de la aplicación Tribuna Global IA."""
 
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -71,6 +72,30 @@ def mostrar_encabezado() -> None:
     )
 
 
+def mostrar_jugador_actual(jugador: dict[str, Any]) -> None:
+    """Muestra el contexto activo sin exponer datos sin escapar."""
+    nombre_original = str(jugador["nombre"])
+    iniciales = "".join(parte[0] for parte in nombre_original.split()[:2]).upper()
+    nombre = escape(nombre_original)
+    pais = escape(str(jugador["pais"]))
+    jugador_id = escape(str(jugador["id"]))
+
+    st.markdown(
+        f"""
+        <section class="tg-player" aria-label="Futbolista seleccionado">
+          <div class="tg-player__avatar" aria-hidden="true">{iniciales}</div>
+          <div class="tg-player__body">
+            <span class="tg-player__label">Conversación enfocada en</span>
+            <strong>{nombre}</strong>
+            <span class="tg-player__country">{pais}</span>
+          </div>
+          <span class="tg-player__id">{jugador_id}</span>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main() -> None:
     """Configura la página inicial de la aplicación."""
     st.set_page_config(
@@ -89,11 +114,7 @@ def main() -> None:
     jugador_seleccionado = seleccionar_jugador(jugadores)
 
     mostrar_encabezado()
-    st.info(
-        "Futbolista seleccionado: "
-        f"**{jugador_seleccionado['nombre']}** · {jugador_seleccionado['pais']}"
-    )
-    st.caption(f"Identificador interno: `{jugador_seleccionado['id']}`")
+    mostrar_jugador_actual(jugador_seleccionado)
 
 
 if __name__ == "__main__":

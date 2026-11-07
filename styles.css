@@ -119,3 +119,61 @@
   font-size: 1.05rem;
   line-height: 1.7;
 }
+
+.tg-player {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--tg-border);
+  border-radius: var(--tg-radius);
+  background: var(--tg-surface);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.16);
+}
+
+.tg-player__avatar {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tg-accent);
+  color: #082116;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+}
+
+.tg-player__body {
+  display: grid;
+  flex: 1;
+  gap: 0.06rem;
+}
+
+.tg-player__label {
+  color: var(--tg-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tg-player__body strong {
+  color: var(--tg-text);
+  font-size: 1rem;
+}
+
+.tg-player__country {
+  color: var(--tg-muted);
+  font-size: 0.82rem;
+}
+
+.tg-player__id {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--tg-border);
+  border-radius: 8px;
+  color: var(--tg-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+}
