@@ -9,8 +9,23 @@ la aplicación.
 ## Estado actual
 
 El repositorio contiene la estructura base, la configuración reproducible, los
-datos ficticios requeridos y el selector validado de futbolistas. La interfaz
-conversacional y la clasificación se implementarán en las siguientes actividades.
+datos ficticios requeridos, el selector validado de futbolistas y la identidad
+visual responsive. La interfaz conversacional y la clasificación se implementarán
+en las siguientes actividades.
+
+## Identidad visual
+
+Tribuna Global IA utiliza una interfaz conversacional oscura inspirada en la
+claridad de las herramientas modernas de IA, con una identidad futbolística propia:
+
+- superficies oscuras y jerarquía visual limpia;
+- verde cancha como color de acción;
+- marca tipográfica `TG` sin recursos externos;
+- contexto visible del jugador seleccionado;
+- estilos responsive, foco de teclado y reducción de movimiento.
+
+Los tokens y componentes visuales viven en `styles.css`; la configuración base
+de Streamlit se mantiene en `.streamlit/config.toml`.
 
 ## Catálogo de futbolistas
 
@@ -78,6 +93,7 @@ La suite tendrá un máximo de diez pruebas prioritarias de funcionamiento.
 ├── app.py
 ├── analisis.py
 ├── almacenamiento.py
+├── styles.css
 ├── data/
 │   ├── jugadores.json
 │   └── opiniones.json
