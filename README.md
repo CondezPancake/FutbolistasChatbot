@@ -12,8 +12,32 @@ El repositorio contiene la estructura base, la configuración reproducible, los
 datos ficticios requeridos, el selector validado de futbolistas y la identidad
 visual responsive. La navegación separa la emisión de opiniones de la consulta
 persistente. El chat ya conserva mensajes durante la sesión; la clasificación
-cuenta con un prompt versionado y seguro. La conexión con Gemini, la salida
-estructurada y el guardado definitivo se implementarán en las siguientes actividades.
+cuenta con un prompt versionado, cliente Gemini y salida estructurada. La
+invocación segura, el manejo de errores y el guardado definitivo se implementarán
+en las siguientes actividades.
+
+## Gemini y salida estructurada
+
+La integración utiliza `ChatGoogleGenerativeAI` con el modelo estable configurado
+en `GEMINI_MODEL`. El cliente se crea de forma diferida: importar los módulos o
+abrir la interfaz no realiza una llamada a la API.
+
+Variables disponibles en `.env`:
+
+```dotenv
+GOOGLE_API_KEY=clave_local_rotada
+GEMINI_MODEL=gemini-3.5-flash
+GEMINI_REASONING_EFFORT=low
+```
+
+La clave se conserva como `SecretStr` y nunca se muestra en el indicador visual.
+Para Gemini 3.5 no se fuerza `temperature`; el nivel de razonamiento queda en
+`low` por defecto para reducir latencia y consumo.
+
+`AnalisisOpinion` limita la respuesta a pertinencia, sentimiento y una razón de
+máximo 300 caracteres. La coherencia se valida después del esquema: una opinión
+pertinente requiere sentimiento y una no pertinente exige un valor nulo. La
+cadena usa `with_structured_output(..., method="json_schema")`.
 
 ## Prompt de clasificación
 
@@ -100,7 +124,7 @@ Copy-Item .env.example .env
 ```
 
 Completa `GOOGLE_API_KEY` en `.env` cuando la integración con Gemini esté lista.
-El archivo `.env` está excluido de Git.
+Usa una clave nueva y rotada. El archivo `.env` está excluido de Git.
 
 ## Ejecución local
 
