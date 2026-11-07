@@ -1,0 +1,14 @@
+services:
+  tribuna-global:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tribuna-global-ia
+    ports:
+      - "8501:8501"
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
+    volumes:
+      - ./datos:/app/datos
+    restart: unless-stopped
