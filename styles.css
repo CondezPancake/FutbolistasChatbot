@@ -96,6 +96,35 @@
   color: var(--tg-text);
 }
 
+.tg-provider-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--tg-border);
+  border-radius: 10px;
+  color: var(--tg-muted);
+  font-size: 0.74rem;
+}
+
+.tg-provider-status > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d6a84b;
+}
+
+.tg-provider-status.is-ready {
+  border-color: rgba(32, 199, 122, 0.24);
+  color: #8be9b7;
+}
+
+.tg-provider-status.is-ready > span {
+  background: var(--tg-accent);
+  box-shadow: 0 0 0 4px var(--tg-accent-soft);
+}
+
 [data-testid="stChatMessage"] {
   margin: 0.65rem 0;
   padding: 1rem 1.05rem;
