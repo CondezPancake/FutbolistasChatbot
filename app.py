@@ -140,6 +140,21 @@ def mostrar_jugador_actual(jugador: dict[str, Any]) -> None:
     )
 
 
+def mostrar_historial_chat() -> None:
+    """Renderiza los mensajes conservando el jugador de cada envío."""
+    for mensaje in st.session_state.historial_chat:
+        rol = mensaje.get("role")
+        contenido = mensaje.get("content")
+        if rol not in {"user", "assistant"} or not isinstance(contenido, str):
+            continue
+
+        avatar = "⚽" if rol == "assistant" else "👤"
+        with st.chat_message(rol, avatar=avatar):
+            if rol == "user" and mensaje.get("jugador_nombre"):
+                st.caption(f"Opinión sobre {mensaje['jugador_nombre']}")
+            st.markdown(contenido)
+
+
 def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
     """Construye la entrada visual de la experiencia conversacional."""
     mostrar_encabezado()
@@ -157,6 +172,7 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
         """,
         unsafe_allow_html=True,
     )
+    mostrar_historial_chat()
 
 
 def mostrar_vista_consultar() -> None:
