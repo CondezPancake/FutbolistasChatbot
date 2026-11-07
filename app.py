@@ -8,6 +8,7 @@ from typing import Any
 import streamlit as st
 
 from almacenamiento import ErrorCatalogo, cargar_jugadores
+from configuracion import gemini_esta_configurado
 
 
 DIRECTORIO_PROYECTO = Path(__file__).resolve().parent
@@ -67,6 +68,22 @@ def cargar_catalogo_aplicacion() -> list[dict[str, Any]]:
     return cargar_jugadores(RUTA_JUGADORES)
 
 
+def mostrar_estado_gemini() -> None:
+    """Muestra disponibilidad de configuración sin revelar secretos."""
+    configurado = gemini_esta_configurado()
+    clase = "is-ready" if configurado else "is-pending"
+    etiqueta = "Gemini configurado" if configurado else "Gemini pendiente"
+    st.markdown(
+        f"""
+        <div class="tg-provider-status {clase}" aria-label="{etiqueta}">
+          <span aria-hidden="true"></span>
+          {etiqueta}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
     """Muestra el catálogo y conserva el identificador como valor interno."""
     jugadores_por_id = {jugador["id"]: jugador for jugador in jugadores}
@@ -108,6 +125,7 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
             on_click=reiniciar_conversacion,
             use_container_width=True,
         )
+        mostrar_estado_gemini()
 
     return jugadores_por_id[jugador_id]
 
