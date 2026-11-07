@@ -1,0 +1,51 @@
+:root {
+  --tg-bg: #0e0f11;
+  --tg-surface: #17191c;
+  --tg-surface-raised: #202328;
+  --tg-border: #2c3036;
+  --tg-text: #f4f5f6;
+  --tg-muted: #a5abb3;
+  --tg-accent: #20c77a;
+  --tg-accent-strong: #13a864;
+  --tg-accent-soft: rgba(32, 199, 122, 0.12);
+  --tg-radius: 16px;
+}
+
+.stApp {
+  background: var(--tg-bg);
+  color: var(--tg-text);
+}
+
+[data-testid="stHeader"] {
+  background: transparent;
+}
+
+[data-testid="stAppViewContainer"] > .main {
+  background: var(--tg-bg);
+}
+
+.main .block-container {
+  width: min(100%, 920px);
+  max-width: 920px;
+  padding-top: 3.5rem;
+  padding-bottom: 7rem;
+}
+
+[data-testid="stSidebar"] {
+  background: #121416;
+  border-right: 1px solid var(--tg-border);
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+  padding: 1.25rem 1rem;
+}
+
+[data-testid="stSelectbox"] > div > div {
+  background: var(--tg-surface);
+  border-color: var(--tg-border);
+  border-radius: 12px;
+}
+
+[data-testid="stSelectbox"] > div > div:hover {
+  border-color: var(--tg-accent);
+}
