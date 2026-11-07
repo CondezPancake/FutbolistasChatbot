@@ -211,8 +211,8 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
           <span class="tg-view-intro__eyebrow">Emitir opinión</span>
           <h2>¿Qué lectura tienes de su juego?</h2>
           <p>
-            En el siguiente paso podrás escribir una opinión y conversar con
-            Tribuna Global IA sin mezclarla con comentarios anteriores.
+            Escribe entre 5 y 1000 caracteres. Cada envío conserva el futbolista
+            seleccionado en ese momento y no mezcla comentarios anteriores.
           </p>
         </section>
         """,
