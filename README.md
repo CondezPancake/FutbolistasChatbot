@@ -8,9 +8,22 @@ la aplicación.
 
 ## Estado actual
 
-El repositorio contiene la estructura base, la configuración reproducible y los
-datos ficticios requeridos. La interfaz conversacional y la clasificación se
-implementarán en las siguientes actividades.
+El repositorio contiene la estructura base, la configuración reproducible, los
+datos ficticios requeridos y el selector validado de futbolistas. La interfaz
+conversacional y la clasificación se implementarán en las siguientes actividades.
+
+## Catálogo de futbolistas
+
+La aplicación lee `data/jugadores.json` con UTF-8 y comprueba antes de mostrarlo:
+
+- versión de esquema compatible;
+- presencia de identificador, nombre y país;
+- textos no vacíos;
+- ausencia de campos inesperados;
+- identificadores internos únicos.
+
+El selector muestra nombre y país, pero utiliza el identificador estable del
+jugador como valor interno.
 
 ## Requisitos
 
