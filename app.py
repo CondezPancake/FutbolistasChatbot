@@ -50,6 +50,11 @@ def inicializar_estado_interfaz() -> None:
         st.session_state.historial_chat = crear_historial_inicial()
 
 
+def reiniciar_conversacion() -> None:
+    """Limpia únicamente el chat conservado en la sesión actual."""
+    st.session_state.historial_chat = crear_historial_inicial()
+
+
 def cargar_estilos() -> None:
     """Inyecta la hoja de estilos local de la aplicación."""
     estilos = RUTA_ESTILOS.read_text(encoding="utf-8")
@@ -96,6 +101,12 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
             ),
             key="vista_activa",
             label_visibility="collapsed",
+        )
+        st.button(
+            "＋  Nueva conversación",
+            key="nueva_conversacion",
+            on_click=reiniciar_conversacion,
+            use_container_width=True,
         )
 
     return jugadores_por_id[jugador_id]
