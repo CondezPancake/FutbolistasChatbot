@@ -147,3 +147,10 @@ def crear_modelo_estructurado(
         AnalisisOpinion,
         method="json_schema",
     )
+
+
+def crear_cadena_analisis(
+    modelo: ChatGoogleGenerativeAI | None = None,
+) -> Runnable:
+    """Compone el prompt y el modelo tipado sin ejecutar la solicitud."""
+    return PROMPT_ANALISIS | crear_modelo_estructurado(modelo)
