@@ -47,7 +47,7 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-La carpeta `datos` se monta en el contenedor para conservar las opiniones entre
+La carpeta `data` se monta en el contenedor para conservar las opiniones entre
 reinicios.
 
 ## Pruebas
@@ -65,7 +65,7 @@ La suite tendrá un máximo de diez pruebas prioritarias de funcionamiento.
 ├── app.py
 ├── analisis.py
 ├── almacenamiento.py
-├── datos/
+├── data/
 │   ├── jugadores.json
 │   └── opiniones.json
 ├── tests/
