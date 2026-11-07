@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "opiniones": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "fecha_utc": "2026-11-06T14:00:00+00:00",
+      "jugador_id": "j001",
+      "jugador_nombre": "Lionel Messi",
+      "opinion_original": "Su visión de juego y sus pases son extraordinarios.",
+      "sentimiento": "positivo",
+      "razon": "La opinión expresa admiración por su visión y capacidad de pase.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "fecha_utc": "2026-11-06T14:05:00+00:00",
+      "jugador_id": "j001",
+      "jugador_nombre": "Lionel Messi",
+      "opinion_original": "Es un jugador de fútbol argentino.",
+      "sentimiento": "neutro",
+      "razon": "El texto presenta una descripción sin elogios ni críticas.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "fecha_utc": "2026-11-06T14:10:00+00:00",
+      "jugador_id": "j001",
+      "jugador_nombre": "Lionel Messi",
+      "opinion_original": "Tiene una técnica brillante, aunque a veces participa poco en la presión.",
+      "sentimiento": "mixto",
+      "razon": "Combina un elogio técnico con una crítica a su participación defensiva.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000004",
+      "fecha_utc": "2026-11-06T14:15:00+00:00",
+      "jugador_id": "j002",
+      "jugador_nombre": "Cristiano Ronaldo",
+      "opinion_original": "Su disciplina y capacidad goleadora son impresionantes.",
+      "sentimiento": "positivo",
+      "razon": "La opinión elogia su disciplina y desempeño goleador.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000005",
+      "fecha_utc": "2026-11-06T14:20:00+00:00",
+      "jugador_id": "j002",
+      "jugador_nombre": "Cristiano Ronaldo",
+      "opinion_original": "Su rendimiento en ese encuentro fue decepcionante.",
+      "sentimiento": "negativo",
+      "razon": "El comentario manifiesta insatisfacción con su rendimiento.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000006",
+      "fecha_utc": "2026-11-06T14:25:00+00:00",
+      "jugador_id": "j002",
+      "jugador_nombre": "Cristiano Ronaldo",
+      "opinion_original": "Es un delantero portugués.",
+      "sentimiento": "neutro",
+      "razon": "La frase es descriptiva y no contiene una valoración.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000007",
+      "fecha_utc": "2026-11-06T14:30:00+00:00",
+      "jugador_id": "j003",
+      "jugador_nombre": "Neymar",
+      "opinion_original": "Su creatividad con el balón hace el juego más emocionante.",
+      "sentimiento": "positivo",
+      "razon": "El texto valora favorablemente su creatividad y estilo de juego.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000008",
+      "fecha_utc": "2026-11-06T14:35:00+00:00",
+      "jugador_id": "j003",
+      "jugador_nombre": "Neymar",
+      "opinion_original": "Tiene mucho talento, pero algunas decisiones dentro del campo me frustran.",
+      "sentimiento": "mixto",
+      "razon": "Reconoce su talento y al mismo tiempo critica algunas decisiones.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "fecha_utc": "2026-11-06T14:40:00+00:00",
+      "jugador_id": "j003",
+      "jugador_nombre": "Neymar",
+      "opinion_original": "No me gustó su actuación; perdió demasiados balones.",
+      "sentimiento": "negativo",
+      "razon": "La opinión desaprueba su actuación y señala pérdidas de balón.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "fecha_utc": "2026-11-06T14:45:00+00:00",
+      "jugador_id": "j013",
+      "jugador_nombre": "Luis Díaz",
+      "opinion_original": "Su velocidad y entrega contagian energía al equipo.",
+      "sentimiento": "positivo",
+      "razon": "La opinión destaca favorablemente su velocidad y esfuerzo.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000011",
+      "fecha_utc": "2026-11-06T14:50:00+00:00",
+      "jugador_id": "j013",
+      "jugador_nombre": "Luis Díaz",
+      "opinion_original": "Es colombiano y juega como extremo.",
+      "sentimiento": "neutro",
+      "razon": "El comentario solo aporta información descriptiva.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "fecha_utc": "2026-11-06T14:55:00+00:00",
+      "jugador_id": "j013",
+      "jugador_nombre": "Luis Díaz",
+      "opinion_original": "Genera buenas oportunidades, aunque debe mejorar la definición.",
+      "sentimiento": "mixto",
+      "razon": "Valora su creación de oportunidades y critica su definición.",
+      "modelo": "registro-ficticio",
+      "version_prompt": "1.0"
+    }
+  ]
+}
