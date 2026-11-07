@@ -140,6 +140,40 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
     )
 
 
+def mostrar_vista_consultar() -> None:
+    """Construye la entrada visual de la consulta persistente."""
+    st.markdown(
+        """
+        <section class="tg-page-heading">
+          <span class="tg-kicker">Archivo de la tribuna</span>
+          <h1>Consulta lo que piensa la afición.</h1>
+          <p>
+            Los registros persistidos se explorarán sin realizar nuevas
+            llamadas al modelo de inteligencia artificial.
+          </p>
+        </section>
+        <section class="tg-query-preview" aria-label="Funciones de consulta">
+          <article>
+            <span>01</span>
+            <strong>Filtra</strong>
+            <p>Acota los resultados por futbolista y sentimiento.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>Compara</strong>
+            <p>Revisa recuentos construidos con los mismos filtros.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>Descarga</strong>
+            <p>Exporta únicamente los registros que estás viendo.</p>
+          </article>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main() -> None:
     """Configura la página inicial de la aplicación."""
     st.set_page_config(
@@ -162,7 +196,7 @@ def main() -> None:
     if st.session_state.vista_activa == Vista.EMITIR.value:
         mostrar_vista_emitir(jugador_seleccionado)
     else:
-        st.info("La vista de consulta se añadirá a continuación.")
+        mostrar_vista_consultar()
 
 
 if __name__ == "__main__":
