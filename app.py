@@ -10,6 +10,13 @@ from almacenamiento import ErrorCatalogo, cargar_jugadores
 
 DIRECTORIO_PROYECTO = Path(__file__).resolve().parent
 RUTA_JUGADORES = DIRECTORIO_PROYECTO / "data" / "jugadores.json"
+RUTA_ESTILOS = DIRECTORIO_PROYECTO / "styles.css"
+
+
+def cargar_estilos() -> None:
+    """Inyecta la hoja de estilos local de la aplicación."""
+    estilos = RUTA_ESTILOS.read_text(encoding="utf-8")
+    st.markdown(f"<style>{estilos}</style>", unsafe_allow_html=True)
 
 
 @st.cache_data
@@ -44,6 +51,7 @@ def main() -> None:
         page_icon="⚽",
         layout="wide",
     )
+    cargar_estilos()
 
     try:
         jugadores = cargar_catalogo_aplicacion()
