@@ -2,6 +2,7 @@
 
 import os
 from dataclasses import dataclass
+from typing import Literal, cast
 
 from dotenv import load_dotenv
 from pydantic import SecretStr
@@ -9,6 +10,8 @@ from pydantic import SecretStr
 
 MODELO_GEMINI_PREDETERMINADO = "gemini-3.5-flash"
 MARCADORES_DE_CLAVE = {"", "tu_clave_de_gemini", "clave_configurada_localmente"}
+NivelRazonamiento = Literal["minimal", "low", "medium", "high"]
+NIVELES_RAZONAMIENTO: set[str] = {"minimal", "low", "medium", "high"}
 
 
 class ErrorConfiguracionIA(RuntimeError):
@@ -21,6 +24,7 @@ class ConfiguracionIA:
 
     api_key: SecretStr
     modelo: str
+    razonamiento: NivelRazonamiento
 
 
 def cargar_configuracion_ia() -> ConfiguracionIA:
@@ -28,6 +32,7 @@ def cargar_configuracion_ia() -> ConfiguracionIA:
     load_dotenv()
     clave = os.getenv("GOOGLE_API_KEY", "").strip()
     modelo = os.getenv("GEMINI_MODEL", MODELO_GEMINI_PREDETERMINADO).strip()
+    razonamiento = os.getenv("GEMINI_REASONING_EFFORT", "low").strip().lower()
 
     if clave in MARCADORES_DE_CLAVE:
         raise ErrorConfiguracionIA(
@@ -35,8 +40,16 @@ def cargar_configuracion_ia() -> ConfiguracionIA:
         )
     if not modelo:
         raise ErrorConfiguracionIA("GEMINI_MODEL no puede estar vacío.")
+    if razonamiento not in NIVELES_RAZONAMIENTO:
+        raise ErrorConfiguracionIA(
+            "GEMINI_REASONING_EFFORT debe ser minimal, low, medium o high."
+        )
 
-    return ConfiguracionIA(api_key=SecretStr(clave), modelo=modelo)
+    return ConfiguracionIA(
+        api_key=SecretStr(clave),
+        modelo=modelo,
+        razonamiento=cast(NivelRazonamiento, razonamiento),
+    )
 
 
 def gemini_esta_configurado() -> bool:

@@ -9,6 +9,7 @@ services:
     environment:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
+      GEMINI_REASONING_EFFORT: ${GEMINI_REASONING_EFFORT:-low}
     volumes:
       - ./data:/app/data
     restart: unless-stopped

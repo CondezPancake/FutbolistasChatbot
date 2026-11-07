@@ -94,7 +94,7 @@ def crear_modelo_gemini(
     return ChatGoogleGenerativeAI(
         model=ajustes.modelo,
         api_key=ajustes.api_key.get_secret_value(),
-        reasoning_effort="low",
+        reasoning_effort=ajustes.razonamiento,
         max_retries=2,
         timeout=30,
     )
