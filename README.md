@@ -11,8 +11,21 @@ la aplicación.
 El repositorio contiene la estructura base, la configuración reproducible, los
 datos ficticios requeridos, el selector validado de futbolistas y la identidad
 visual responsive. La navegación separa la emisión de opiniones de la consulta
-persistente. El chat y la clasificación se implementarán en las siguientes
-actividades.
+persistente. El chat ya conserva mensajes durante la sesión; la clasificación
+con Gemini y el guardado definitivo se implementarán en las siguientes actividades.
+
+## Conversación de sesión
+
+La sección **Emitir opinión** permite:
+
+- enviar textos de 5 a 1000 caracteres con `st.chat_input`;
+- mostrar mensajes mediante `st.chat_message`;
+- capturar el identificador y nombre del futbolista al enviar cada opinión;
+- mantener el historial durante las reejecuciones de Streamlit;
+- iniciar una conversación nueva sin modificar `data/opiniones.json`.
+
+Las respuestas actuales indican claramente que el análisis y el guardado todavía
+no se han ejecutado; no se inventan clasificaciones provisionales.
 
 ## Navegación
 
