@@ -3,6 +3,7 @@
 from typing import Literal, Self
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import Runnable
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -134,4 +135,15 @@ def crear_modelo_gemini(
         reasoning_effort=ajustes.razonamiento,
         max_retries=2,
         timeout=30,
+    )
+
+
+def crear_modelo_estructurado(
+    modelo: ChatGoogleGenerativeAI | None = None,
+) -> Runnable:
+    """Aplica el esquema Pydantic mediante el JSON Schema nativo de Gemini."""
+    modelo_base = modelo or crear_modelo_gemini()
+    return modelo_base.with_structured_output(
+        AnalisisOpinion,
+        method="json_schema",
     )
