@@ -66,6 +66,16 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
                 f"{jugadores_por_id[identificador]['pais']}"
             ),
         )
+        st.divider()
+        st.radio(
+            "Navegación principal",
+            options=[vista.value for vista in Vista],
+            format_func=lambda opcion: (
+                f"💬  {opcion}" if opcion == Vista.EMITIR.value else f"📚  {opcion}"
+            ),
+            key="vista_activa",
+            label_visibility="collapsed",
+        )
 
     return jugadores_por_id[jugador_id]
 
