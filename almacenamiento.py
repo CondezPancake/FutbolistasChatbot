@@ -1,8 +1,9 @@
 """Lectura, escritura y consulta de los archivos JSON del proyecto."""
 
 import json
+from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -26,7 +27,7 @@ class CatalogoJugadores(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    version: int = Field(ge=1)
+    version: Literal[1]
     jugadores: list[JugadorCatalogo] = Field(min_length=1)
 
 
@@ -50,5 +51,14 @@ def cargar_jugadores(ruta: str | Path) -> list[dict[str, Any]]:
         catalogo = CatalogoJugadores.model_validate(datos)
     except ValidationError as exc:
         raise ErrorCatalogo("El catálogo no cumple la estructura esperada.") from exc
+
+    conteo_ids = Counter(jugador.id for jugador in catalogo.jugadores)
+    ids_repetidos = sorted(
+        jugador_id for jugador_id, cantidad in conteo_ids.items() if cantidad > 1
+    )
+    if ids_repetidos:
+        raise ErrorCatalogo(
+            f"El catálogo contiene identificadores repetidos: {', '.join(ids_repetidos)}."
+        )
 
     return [jugador.model_dump() for jugador in catalogo.jugadores]
