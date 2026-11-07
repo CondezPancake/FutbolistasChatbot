@@ -1,6 +1,9 @@
 """Clasificación de opiniones mediante LangChain y Gemini."""
 
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+from configuracion import ConfiguracionIA, cargar_configuracion_ia
 
 
 PROMPT_VERSION = "1.0"
@@ -81,3 +84,17 @@ def crear_prompt_analisis() -> ChatPromptTemplate:
 
 
 PROMPT_ANALISIS = crear_prompt_analisis()
+
+
+def crear_modelo_gemini(
+    configuracion: ConfiguracionIA | None = None,
+) -> ChatGoogleGenerativeAI:
+    """Crea el cliente de Gemini de forma diferida y sin registrar secretos."""
+    ajustes = configuracion or cargar_configuracion_ia()
+    return ChatGoogleGenerativeAI(
+        model=ajustes.modelo,
+        api_key=ajustes.api_key.get_secret_value(),
+        reasoning_effort="low",
+        max_retries=2,
+        timeout=30,
+    )
