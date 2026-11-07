@@ -13,6 +13,8 @@ from almacenamiento import ErrorCatalogo, cargar_jugadores
 DIRECTORIO_PROYECTO = Path(__file__).resolve().parent
 RUTA_JUGADORES = DIRECTORIO_PROYECTO / "data" / "jugadores.json"
 RUTA_ESTILOS = DIRECTORIO_PROYECTO / "styles.css"
+LONGITUD_MINIMA_OPINION = 5
+LONGITUD_MAXIMA_OPINION = 1000
 
 
 class Vista(str, Enum):
@@ -155,6 +157,39 @@ def mostrar_historial_chat() -> None:
             st.markdown(contenido)
 
 
+def agregar_opinion_al_historial(jugador: dict[str, Any], texto: str) -> str | None:
+    """Valida el mensaje y captura el jugador seleccionado al enviarlo."""
+    opinion = texto.strip()
+    if len(opinion) < LONGITUD_MINIMA_OPINION:
+        return "La opinión debe contener al menos 5 caracteres útiles."
+    if len(opinion) > LONGITUD_MAXIMA_OPINION:
+        return "La opinión no puede superar los 1000 caracteres."
+
+    st.session_state.historial_chat.append(
+        {
+            "role": "user",
+            "content": opinion,
+            "tipo": "opinion",
+            "jugador_id": jugador["id"],
+            "jugador_nombre": jugador["nombre"],
+        }
+    )
+    st.session_state.historial_chat.append(
+        {
+            "role": "assistant",
+            "content": (
+                f"Recibí tu opinión sobre **{jugador['nombre']}**. "
+                "La clasificación con IA se conectará en el siguiente paso; "
+                "este mensaje todavía no se guardó en el archivo de opiniones."
+            ),
+            "tipo": "estado",
+            "jugador_id": jugador["id"],
+            "jugador_nombre": jugador["nombre"],
+        }
+    )
+    return None
+
+
 def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
     """Construye la entrada visual de la experiencia conversacional."""
     mostrar_encabezado()
@@ -173,6 +208,16 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
         unsafe_allow_html=True,
     )
     mostrar_historial_chat()
+    opinion = st.chat_input(
+        f"Escribe tu opinión sobre {jugador['nombre']}",
+        max_chars=LONGITUD_MAXIMA_OPINION,
+    )
+    if opinion is not None:
+        error = agregar_opinion_al_historial(jugador, opinion)
+        if error:
+            st.error(error)
+        else:
+            st.rerun()
 
 
 def mostrar_vista_consultar() -> None:
