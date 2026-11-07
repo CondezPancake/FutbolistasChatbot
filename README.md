@@ -10,8 +10,21 @@ la aplicación.
 
 El repositorio contiene la estructura base, la configuración reproducible, los
 datos ficticios requeridos, el selector validado de futbolistas y la identidad
-visual responsive. La interfaz conversacional y la clasificación se implementarán
-en las siguientes actividades.
+visual responsive. La navegación separa la emisión de opiniones de la consulta
+persistente. El chat y la clasificación se implementarán en las siguientes
+actividades.
+
+## Navegación
+
+La barra lateral conserva dos recorridos independientes:
+
+- **Emitir opinión:** mantiene visible el futbolista seleccionado y prepara la
+  experiencia conversacional.
+- **Consultar opiniones:** presenta el acceso a filtros, recuentos y descarga sin
+  realizar llamadas al modelo.
+
+La vista activa se conserva en `st.session_state` durante las reejecuciones de
+Streamlit y se restablece de forma segura si contiene un valor desconocido.
 
 ## Identidad visual
 
