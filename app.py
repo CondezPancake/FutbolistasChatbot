@@ -102,6 +102,7 @@ def main() -> None:
         page_title="Tribuna Global IA",
         page_icon="⚽",
         layout="wide",
+        initial_sidebar_state="expanded",
     )
     cargar_estilos()
 
