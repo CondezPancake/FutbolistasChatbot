@@ -1,10 +1,10 @@
 """Clasificación de opiniones mediante LangChain y Gemini."""
 
-from typing import Literal
+from typing import Literal, Self
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from configuracion import ConfiguracionIA, cargar_configuracion_ia
 
@@ -29,6 +29,21 @@ class AnalisisOpinion(BaseModel):
         max_length=300,
         description="Justificación breve, en español y redactada en tercera persona.",
     )
+
+    @field_validator("razon", mode="before")
+    @classmethod
+    def normalizar_razon(cls, valor: object) -> object:
+        """Elimina espacios exteriores antes de aplicar los límites."""
+        return valor.strip() if isinstance(valor, str) else valor
+
+    @model_validator(mode="after")
+    def validar_coherencia(self) -> Self:
+        """Relaciona pertinencia y sentimiento más allá del esquema JSON."""
+        if self.es_pertinente and self.sentimiento is None:
+            raise ValueError("Una opinión pertinente debe tener sentimiento.")
+        if not self.es_pertinente and self.sentimiento is not None:
+            raise ValueError("Una opinión no pertinente debe tener sentimiento nulo.")
+        return self
 
 REGLAS_BASE = """
 Eres un sistema de análisis de opiniones de aficionados sobre futbolistas.
