@@ -2,6 +2,7 @@
 
 from enum import Enum
 from html import escape
+import json
 from pathlib import Path
 from typing import Any
 
@@ -10,8 +11,11 @@ import streamlit as st
 from almacenamiento import (
     ErrorCatalogo,
     ErrorOpiniones,
+    SENTIMIENTOS,
     cargar_jugadores,
     cargar_opiniones,
+    consultar_opiniones,
+    contar_sentimientos,
     crear_registro,
     guardar_opinion,
 )
@@ -29,6 +33,12 @@ RUTA_OPINIONES = DIRECTORIO_PROYECTO / "data" / "opiniones.json"
 RUTA_ESTILOS = DIRECTORIO_PROYECTO / "styles.css"
 LONGITUD_MINIMA_OPINION = 5
 LONGITUD_MAXIMA_OPINION = 1000
+ETIQUETAS_SENTIMIENTO = {
+    "positivo": "Positivo",
+    "negativo": "Negativo",
+    "neutro": "Neutro",
+    "mixto": "Mixto",
+}
 
 
 class Vista(str, Enum):
@@ -321,7 +331,10 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
             st.rerun()
 
 
-def mostrar_vista_consultar(archivo_opiniones: dict[str, Any]) -> None:
+def mostrar_vista_consultar(
+    archivo_opiniones: dict[str, Any],
+    jugadores: list[dict[str, Any]],
+) -> None:
     """Construye la entrada visual de la consulta persistente."""
     st.markdown(
         """
@@ -333,28 +346,89 @@ def mostrar_vista_consultar(archivo_opiniones: dict[str, Any]) -> None:
             llamadas al modelo de inteligencia artificial.
           </p>
         </section>
-        <section class="tg-query-preview" aria-label="Funciones de consulta">
-          <article>
-            <span>01</span>
-            <strong>Filtra</strong>
-            <p>Acota los resultados por futbolista y sentimiento.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <strong>Compara</strong>
-            <p>Revisa recuentos construidos con los mismos filtros.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <strong>Descarga</strong>
-            <p>Exporta únicamente los registros que estás viendo.</p>
-          </article>
-        </section>
         """,
         unsafe_allow_html=True,
     )
+
+    jugadores_por_id = {jugador["id"]: jugador for jugador in jugadores}
+    st.markdown(
+        "<div class='tg-query-section'><strong>Filtra el archivo</strong>"
+        "<span>Los dos filtros se aplican en conjunto.</span></div>",
+        unsafe_allow_html=True,
+    )
+    columna_jugador, columna_sentimiento = st.columns(2)
+    with columna_jugador:
+        jugador_id = st.selectbox(
+            "Jugador",
+            options=[None, *jugadores_por_id],
+            format_func=lambda valor: (
+                "Todos los jugadores"
+                if valor is None
+                else jugadores_por_id[valor]["nombre"]
+            ),
+            key="filtro_jugador",
+        )
+    with columna_sentimiento:
+        sentimiento = st.selectbox(
+            "Sentimiento",
+            options=[None, *SENTIMIENTOS],
+            format_func=lambda valor: (
+                "Todos los sentimientos"
+                if valor is None
+                else ETIQUETAS_SENTIMIENTO[valor]
+            ),
+            key="filtro_sentimiento",
+        )
+
+    registros_filtrados = consultar_opiniones(
+        archivo_opiniones["opiniones"],
+        jugador_id=jugador_id,
+        sentimiento=sentimiento,
+    )
+    conteos = contar_sentimientos(registros_filtrados)
+
+    st.markdown(
+        "<div class='tg-query-section'><strong>Resumen filtrado</strong>"
+        "<span>Tabla, cifras y descarga comparten el mismo resultado.</span></div>",
+        unsafe_allow_html=True,
+    )
+    columnas_metricas = st.columns(5)
+    columnas_metricas[0].metric("Total", len(registros_filtrados))
+    for columna, categoria in zip(columnas_metricas[1:], SENTIMIENTOS, strict=True):
+        columna.metric(ETIQUETAS_SENTIMIENTO[categoria], conteos[categoria])
+
+    if registros_filtrados:
+        filas = [
+            {
+                "Fecha UTC": registro["fecha_utc"].replace("T", " ").replace(
+                    "+00:00", " UTC"
+                ),
+                "Jugador": registro["jugador_nombre"],
+                "Opinión original": registro["opinion_original"],
+                "Sentimiento": ETIQUETAS_SENTIMIENTO[registro["sentimiento"]],
+                "Razón": registro["razon"],
+            }
+            for registro in registros_filtrados
+        ]
+        st.dataframe(filas, hide_index=True, width="stretch")
+    else:
+        st.info("No hay opiniones que coincidan con los filtros seleccionados.")
+
+    contenido_descarga = json.dumps(
+        {"version": 1, "opiniones": registros_filtrados},
+        ensure_ascii=False,
+        indent=2,
+    )
+    st.download_button(
+        "Descargar resultados en JSON",
+        data=f"{contenido_descarga}\n",
+        file_name="opiniones_filtradas.json",
+        mime="application/json",
+        width="stretch",
+    )
     st.caption(
-        f"Archivo validado: {len(archivo_opiniones['opiniones'])} opiniones disponibles."
+        f"Archivo validado: {len(archivo_opiniones['opiniones'])} opiniones disponibles. "
+        "La consulta no consume Gemini."
     )
 
 
@@ -381,7 +455,7 @@ def main() -> None:
     if st.session_state.vista_activa == Vista.EMITIR.value:
         mostrar_vista_emitir(jugador_seleccionado)
     else:
-        mostrar_vista_consultar(archivo_opiniones)
+        mostrar_vista_consultar(archivo_opiniones, jugadores)
 
 
 if __name__ == "__main__":
