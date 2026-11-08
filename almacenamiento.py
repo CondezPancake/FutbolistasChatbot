@@ -22,6 +22,15 @@ from pydantic import (
 from analisis import PROMPT_VERSION, AnalisisOpinion
 
 
+SentimientoOpinion = Literal["positivo", "negativo", "neutro", "mixto"]
+SENTIMIENTOS: tuple[SentimientoOpinion, ...] = (
+    "positivo",
+    "negativo",
+    "neutro",
+    "mixto",
+)
+
+
 class ErrorCatalogo(ValueError):
     """Indica que el catálogo no se puede utilizar de forma segura."""
 
@@ -59,7 +68,7 @@ class OpinionPersistida(BaseModel):
     jugador_id: str = Field(min_length=1)
     jugador_nombre: str = Field(min_length=1)
     opinion_original: str = Field(min_length=5, max_length=1000)
-    sentimiento: Literal["positivo", "negativo", "neutro", "mixto"]
+    sentimiento: SentimientoOpinion
     razon: str = Field(min_length=1, max_length=300)
     modelo: str = Field(min_length=1)
     version_prompt: str = Field(min_length=1)
@@ -243,3 +252,26 @@ def guardar_opinion(ruta: str | Path, registro: dict[str, Any]) -> bool:
         ) from exc
 
     return True
+
+
+def consultar_opiniones(
+    registros: list[dict[str, Any]],
+    jugador_id: str | None = None,
+    sentimiento: SentimientoOpinion | None = None,
+) -> list[dict[str, Any]]:
+    """Filtra registros en memoria sin mutarlos ni consultar al modelo."""
+    if sentimiento is not None and sentimiento not in SENTIMIENTOS:
+        raise ErrorOpiniones("El filtro de sentimiento no es válido.")
+
+    return [
+        registro.copy()
+        for registro in registros
+        if (jugador_id is None or registro.get("jugador_id") == jugador_id)
+        and (sentimiento is None or registro.get("sentimiento") == sentimiento)
+    ]
+
+
+def contar_sentimientos(registros: list[dict[str, Any]]) -> dict[str, int]:
+    """Cuenta las cuatro categorías sobre el mismo resultado filtrado."""
+    conteo = Counter(registro.get("sentimiento") for registro in registros)
+    return {categoria: conteo[categoria] for categoria in SENTIMIENTOS}
