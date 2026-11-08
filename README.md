@@ -67,6 +67,7 @@ del archivo no realizan llamadas a Gemini.
 La sección **Emitir opinión** permite:
 
 - enviar textos de 5 a 1000 caracteres con `st.chat_input`;
+- alternar entre una opinión persistente y una pregunta informativa;
 - mostrar mensajes mediante `st.chat_message`;
 - capturar el identificador y nombre del futbolista al enviar cada opinión;
 - mantener el historial durante las reejecuciones de Streamlit;
@@ -75,6 +76,11 @@ La sección **Emitir opinión** permite:
 Las respuestas distinguen un análisis pertinente, un texto ajeno al futbolista,
 un fallo de Gemini y un fallo de escritura. La confirmación de guardado aparece
 únicamente después de reemplazar correctamente el archivo persistente.
+
+El futbolista se elige mediante opciones cerradas, sin campo de escritura. Al
+enviar el primer mensaje queda fijado durante toda la conversación; para cambiarlo
+se debe pulsar **Nueva conversación**. Las preguntas se responden de forma breve
+y aislada, pero nunca se clasifican ni se guardan como opiniones.
 
 ## Carga de opiniones
 
@@ -255,7 +261,8 @@ El cumplimiento punto por punto y la reflexión sobre ambigüedades están en
 7. Inicia localmente con `streamlit run app.py` y abre
    `http://localhost:8501`.
 8. En **Emitir opinión**, selecciona un jugador, envía un texto y comprueba que
-   la confirmación aparece solamente después del guardado.
+   la confirmación aparece solamente después del guardado. Cambia a **Hacer
+   pregunta** para consultar información sin crear un registro.
 9. En **Consultar opiniones**, combina los filtros, compara tabla y recuentos y
    descarga `opiniones_filtradas.json`.
 10. Para la demostración con Docker ejecuta `docker compose up --build -d`,

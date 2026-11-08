@@ -505,6 +505,8 @@ def mostrar_vista_consultar(
             {
                 "Fecha UTC": registro["fecha_utc"].replace("T", " ").replace(
                     "+00:00", " UTC"
+                ).replace(
+                    "Z", " UTC"
                 ),
                 "Jugador": registro["jugador_nombre"],
                 "Opinión original": registro["opinion_original"],
