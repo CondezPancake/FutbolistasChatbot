@@ -72,11 +72,14 @@ def inicializar_estado_interfaz() -> None:
         st.session_state.vista_activa = Vista.EMITIR.value
     if not isinstance(st.session_state.get("historial_chat"), list):
         st.session_state.historial_chat = crear_historial_inicial()
+    if not isinstance(st.session_state.get("jugador_conversacion_id"), str):
+        st.session_state.jugador_conversacion_id = None
 
 
 def reiniciar_conversacion() -> None:
-    """Limpia únicamente el chat conservado en la sesión actual."""
+    """Limpia el chat y permite seleccionar otro jugador sin borrar archivos."""
     st.session_state.historial_chat = crear_historial_inicial()
+    st.session_state.jugador_conversacion_id = None
 
 
 def cargar_estilos() -> None:
@@ -113,8 +116,18 @@ def mostrar_estado_gemini() -> None:
 
 
 def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
-    """Muestra el catálogo y conserva el identificador como valor interno."""
+    """Selecciona sin escritura y bloquea el jugador durante la conversación."""
     jugadores_por_id = {jugador["id"]: jugador for jugador in jugadores}
+    jugador_bloqueado_id = st.session_state.jugador_conversacion_id
+    if jugador_bloqueado_id not in jugadores_por_id:
+        jugador_bloqueado_id = None
+        st.session_state.jugador_conversacion_id = None
+
+    jugador_estado = st.session_state.get("jugador_seleccionado_id")
+    if jugador_bloqueado_id is not None:
+        st.session_state.jugador_seleccionado_id = jugador_bloqueado_id
+    elif jugador_estado not in jugadores_por_id:
+        st.session_state.jugador_seleccionado_id = next(iter(jugadores_por_id))
 
     with st.sidebar:
         st.markdown(
@@ -129,14 +142,21 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
             """,
             unsafe_allow_html=True,
         )
-        jugador_id = st.selectbox(
+        jugador_id = st.radio(
             "Futbolista",
             options=list(jugadores_por_id),
             format_func=lambda identificador: (
                 f"{jugadores_por_id[identificador]['nombre']} · "
                 f"{jugadores_por_id[identificador]['pais']}"
             ),
+            key="jugador_seleccionado_id",
+            disabled=jugador_bloqueado_id is not None,
         )
+        if jugador_bloqueado_id is not None:
+            st.caption(
+                "El futbolista está fijado para esta conversación. "
+                "Pulsa “Nueva conversación” para cambiarlo."
+            )
         st.divider()
         st.radio(
             "Navegación principal",
@@ -222,6 +242,7 @@ def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
     if len(opinion) > LONGITUD_MAXIMA_OPINION:
         return "La opinión no puede superar los 1000 caracteres."
 
+    st.session_state.jugador_conversacion_id = jugador["id"]
     mensaje_usuario = {
         "role": "user",
         "content": opinion,
@@ -358,16 +379,21 @@ def mostrar_vista_consultar(
     )
     columna_jugador, columna_sentimiento = st.columns(2)
     with columna_jugador:
-        jugador_id = st.selectbox(
+        jugador_filtro = st.pills(
             "Jugador",
-            options=[None, *jugadores_por_id],
+            options=["todos", *jugadores_por_id],
+            default="todos",
+            required=True,
             format_func=lambda valor: (
                 "Todos los jugadores"
-                if valor is None
+                if valor == "todos"
                 else jugadores_por_id[valor]["nombre"]
             ),
             key="filtro_jugador",
+            width="stretch",
+            wrap=True,
         )
+        jugador_id = None if jugador_filtro == "todos" else jugador_filtro
     with columna_sentimiento:
         sentimiento = st.selectbox(
             "Sentimiento",
