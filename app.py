@@ -7,9 +7,20 @@ from typing import Any
 
 import streamlit as st
 
-from almacenamiento import ErrorCatalogo, ErrorOpiniones, cargar_jugadores, cargar_opiniones
+from almacenamiento import (
+    ErrorCatalogo,
+    ErrorOpiniones,
+    cargar_jugadores,
+    cargar_opiniones,
+    crear_registro,
+    guardar_opinion,
+)
 from analisis import ErrorAnalisis, ErrorEntradaAnalisis, analizar_opinion
-from configuracion import gemini_esta_configurado
+from configuracion import (
+    ErrorConfiguracionIA,
+    cargar_configuracion_ia,
+    gemini_esta_configurado,
+)
 
 
 DIRECTORIO_PROYECTO = Path(__file__).resolve().parent
@@ -194,22 +205,22 @@ def mostrar_historial_chat() -> None:
 
 
 def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
-    """Captura el envío, solicita su análisis y conserva cualquier fallo."""
+    """Analiza y persiste un envío, confirmándolo solo después de escribir."""
     opinion = texto.strip()
     if len(opinion) < LONGITUD_MINIMA_OPINION:
         return "La opinión debe contener al menos 5 caracteres útiles."
     if len(opinion) > LONGITUD_MAXIMA_OPINION:
         return "La opinión no puede superar los 1000 caracteres."
 
-    st.session_state.historial_chat.append(
-        {
-            "role": "user",
-            "content": opinion,
-            "tipo": "opinion",
-            "jugador_id": jugador["id"],
-            "jugador_nombre": jugador["nombre"],
-        }
-    )
+    mensaje_usuario = {
+        "role": "user",
+        "content": opinion,
+        "tipo": "opinion",
+        "jugador_id": jugador["id"],
+        "jugador_nombre": jugador["nombre"],
+    }
+    st.session_state.historial_chat.append(mensaje_usuario)
+    registro_id = None
 
     try:
         with st.spinner("Gemini está analizando únicamente este mensaje..."):
@@ -224,12 +235,41 @@ def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
     else:
         if resultado.es_pertinente:
             sentimiento = str(resultado.sentimiento).capitalize()
-            contenido = (
-                f"**Sentimiento: {sentimiento}**\n\n"
-                f"{resultado.razon}\n\n"
-                "_Análisis validado. El guardado se conectará en el siguiente bloque._"
-            )
-            tipo = "analisis"
+            try:
+                configuracion = cargar_configuracion_ia()
+                registro = crear_registro(
+                    jugador,
+                    opinion,
+                    resultado,
+                    configuracion.modelo,
+                )
+                registro_id = registro["id"]
+                mensaje_usuario["registro_id"] = registro_id
+                guardado = guardar_opinion(RUTA_OPINIONES, registro)
+            except (ErrorOpiniones, ErrorConfiguracionIA) as exc:
+                contenido = (
+                    f"**Sentimiento: {sentimiento}**\n\n"
+                    f"{resultado.razon}\n\n"
+                    "⚠️ **El análisis terminó, pero no fue posible guardar la opinión.**\n\n"
+                    f"{exc}\n\n"
+                    "_Tu texto permanece en esta conversación._"
+                )
+                tipo = "error_guardado"
+            else:
+                if guardado:
+                    contenido = (
+                        f"**Sentimiento: {sentimiento}**\n\n"
+                        f"{resultado.razon}\n\n"
+                        "✅ **Opinión guardada correctamente.**"
+                    )
+                    tipo = "opinion_guardada"
+                else:
+                    contenido = (
+                        f"**Sentimiento: {sentimiento}**\n\n"
+                        f"{resultado.razon}\n\n"
+                        "ℹ️ **Este envío ya estaba guardado; no se creó un duplicado.**"
+                    )
+                    tipo = "opinion_existente"
         else:
             contenido = (
                 "**Mensaje no pertinente**\n\n"
@@ -245,6 +285,7 @@ def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
             "tipo": tipo,
             "jugador_id": jugador["id"],
             "jugador_nombre": jugador["nombre"],
+            "registro_id": registro_id,
         }
     )
     return None

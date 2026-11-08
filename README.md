@@ -13,8 +13,9 @@ datos ficticios requeridos, el selector validado de futbolistas y la identidad
 visual responsive. La navegación separa la emisión de opiniones de la consulta
 persistente. El chat conserva mensajes durante la sesión e invoca una cadena de
 Gemini con salida estructurada. El archivo de opiniones se carga bajo un esquema
-validado. La creación y el guardado definitivo de nuevos registros corresponden
-al siguiente bloque.
+validado. Los análisis pertinentes se convierten en registros completos y se
+guardan de forma atómica; las consultas y filtros corresponden al siguiente
+bloque.
 
 ## Gemini y salida estructurada
 
@@ -70,8 +71,9 @@ La sección **Emitir opinión** permite:
 - mantener el historial durante las reejecuciones de Streamlit;
 - iniciar una conversación nueva sin modificar `data/opiniones.json`.
 
-Las respuestas distinguen un análisis pertinente, un texto ajeno al futbolista y
-un fallo de Gemini. En este bloque el resultado aún no se guarda en el archivo.
+Las respuestas distinguen un análisis pertinente, un texto ajeno al futbolista,
+un fallo de Gemini y un fallo de escritura. La confirmación de guardado aparece
+únicamente después de reemplazar correctamente el archivo persistente.
 
 ## Carga de opiniones
 
@@ -82,6 +84,18 @@ prompt. También se rechazan campos inesperados e identificadores repetidos.
 Si el archivo no existe, la aplicación trabaja con una estructura vacía en
 memoria. Si contiene JSON inválido o un esquema desconocido, muestra el error y
 conserva el archivo original sin reemplazarlo silenciosamente.
+
+## Persistencia segura
+
+La aplicación, no Gemini, genera el UUID, la fecha UTC, la identidad del jugador,
+el modelo y la versión del prompt. Solo los análisis pertinentes se convierten
+en registros.
+
+Antes de guardar se vuelve a validar el registro y el archivo completo. El nuevo
+contenido se escribe en un temporal dentro de `data`, se sincroniza y finalmente
+reemplaza `opiniones.json`. Si el proceso falla, el original se conserva. Repetir
+el guardado del mismo UUID no crea otro registro; dos envíos independientes con
+el mismo texto sí pueden conservarse como opiniones distintas.
 
 ## Navegación
 
