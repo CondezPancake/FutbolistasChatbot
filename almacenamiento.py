@@ -1,9 +1,11 @@
 """Lectura, escritura y consulta de los archivos JSON del proyecto."""
 
-import json
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+import json
+import os
 from pathlib import Path
+import tempfile
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
@@ -179,3 +181,65 @@ def crear_registro(
         raise ErrorOpiniones("No fue posible construir un registro de opinión válido.") from exc
 
     return registro.model_dump(mode="json")
+
+
+def guardar_opinion(ruta: str | Path, registro: dict[str, Any]) -> bool:
+    """Añade una opinión mediante reemplazo atómico y evita repetir su UUID.
+
+    Devuelve ``True`` cuando escribe un registro nuevo y ``False`` cuando el
+    identificador ya estaba persistido, lo que hace seguro repetir el guardado.
+    """
+    ruta_opiniones = Path(ruta)
+
+    try:
+        registro_validado = OpinionPersistida.model_validate(registro)
+    except ValidationError as exc:
+        raise ErrorOpiniones("La opinión recibida no cumple la estructura esperada.") from exc
+
+    archivo_actual = cargar_opiniones(ruta_opiniones)
+    identificador = str(registro_validado.id)
+    if any(
+        opinion["id"] == identificador for opinion in archivo_actual["opiniones"]
+    ):
+        return False
+
+    archivo_actual["opiniones"].append(registro_validado.model_dump(mode="json"))
+    try:
+        archivo_validado = ArchivoOpiniones.model_validate(archivo_actual)
+    except ValidationError as exc:
+        raise ErrorOpiniones("No fue posible validar el archivo antes de guardarlo.") from exc
+
+    ruta_temporal: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            prefix=f".{ruta_opiniones.name}.",
+            suffix=".tmp",
+            dir=ruta_opiniones.parent,
+            delete=False,
+        ) as archivo_temporal:
+            ruta_temporal = Path(archivo_temporal.name)
+            json.dump(
+                archivo_validado.model_dump(mode="json"),
+                archivo_temporal,
+                ensure_ascii=False,
+                indent=2,
+            )
+            archivo_temporal.write("\n")
+            archivo_temporal.flush()
+            os.fsync(archivo_temporal.fileno())
+
+        os.replace(ruta_temporal, ruta_opiniones)
+    except OSError as exc:
+        if ruta_temporal is not None:
+            try:
+                ruta_temporal.unlink(missing_ok=True)
+            except OSError:
+                pass
+        raise ErrorOpiniones(
+            "No fue posible guardar la opinión; el archivo original se conservó."
+        ) from exc
+
+    return True
