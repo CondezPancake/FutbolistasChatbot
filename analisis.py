@@ -1,17 +1,35 @@
 """Clasificación de opiniones mediante LangChain y Gemini."""
 
-from typing import Literal, Self
+from collections.abc import Mapping
+from typing import Any, Literal, Self
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from configuracion import ConfiguracionIA, cargar_configuracion_ia
 
 
 PROMPT_VERSION = "1.0"
 Sentimiento = Literal["positivo", "negativo", "neutro", "mixto"]
+LONGITUD_MINIMA_OPINION = 5
+LONGITUD_MAXIMA_OPINION = 1000
+
+
+class ErrorAnalisis(RuntimeError):
+    """Error seguro que puede comunicarse sin exponer datos del proveedor."""
+
+
+class ErrorEntradaAnalisis(ValueError):
+    """Indica que jugador u opinión no cumplen el contrato de entrada."""
 
 
 class AnalisisOpinion(BaseModel):
@@ -154,3 +172,47 @@ def crear_cadena_analisis(
 ) -> Runnable:
     """Compone el prompt y el modelo tipado sin ejecutar la solicitud."""
     return PROMPT_ANALISIS | crear_modelo_estructurado(modelo)
+
+
+def analizar_opinion(
+    jugador: Mapping[str, Any],
+    texto: str,
+    cadena: Runnable | None = None,
+) -> AnalisisOpinion:
+    """Analiza una sola opinión y devuelve únicamente una respuesta validada.
+
+    La cadena se puede inyectar para comprobar el flujo sin consumir la API. Los
+    detalles internos del proveedor se conservan como causa de la excepción,
+    pero nunca forman parte del mensaje mostrado al usuario.
+    """
+    nombre = jugador.get("nombre") if isinstance(jugador, Mapping) else None
+    if not isinstance(nombre, str) or not nombre.strip():
+        raise ErrorEntradaAnalisis("El jugador seleccionado no es válido.")
+    if not isinstance(texto, str):
+        raise ErrorEntradaAnalisis("La opinión debe ser texto.")
+
+    opinion = texto.strip()
+    if len(opinion) < LONGITUD_MINIMA_OPINION:
+        raise ErrorEntradaAnalisis("La opinión debe contener al menos 5 caracteres útiles.")
+    if len(opinion) > LONGITUD_MAXIMA_OPINION:
+        raise ErrorEntradaAnalisis("La opinión no puede superar los 1000 caracteres.")
+
+    try:
+        cadena_analisis = cadena or crear_cadena_analisis()
+        resultado = cadena_analisis.invoke(
+            {
+                "jugador": nombre.strip(),
+                "opinion": opinion,
+            }
+        )
+        return AnalisisOpinion.model_validate(resultado)
+    except ValidationError as exc:
+        raise ErrorAnalisis(
+            "Gemini devolvió un análisis con una estructura no válida. Intenta nuevamente."
+        ) from exc
+    except ErrorAnalisis:
+        raise
+    except Exception as exc:
+        raise ErrorAnalisis(
+            "No fue posible completar el análisis con Gemini. Intenta nuevamente."
+        ) from exc
