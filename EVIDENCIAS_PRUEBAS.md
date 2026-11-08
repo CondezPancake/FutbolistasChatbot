@@ -91,12 +91,6 @@ Después de utilizar la aplicación y añadir una opinión real, la suite se aju
 para verificar el mínimo exigido de 12 registros sin asumir que el archivo nunca
 crecerá. El resultado continuó en **10 aprobadas, 0 fallidas**.
 
-También se comprobaron estos comportamientos:
-
-- los futbolistas se eligen mediante opciones cerradas, sin entrada de texto;
-- el jugador queda fijado después del primer mensaje;
-- **Nueva conversación** permite seleccionar otro jugador;
-- una pregunta real sobre Lionel Messi obtuvo una respuesta informativa breve;
-- la pregunta no llamó a `guardar_opinion` ni modificó `opiniones.json`;
-- el prompt de preguntas limita la respuesta, reconoce incertidumbre y trata el
-  texto del usuario como contenido no confiable.
+También se comprobó que los futbolistas se eligen mediante opciones cerradas,
+sin entrada de texto, tanto en el chat como en la vista de consultas. Cambiar la
+selección no altera el jugador asociado a los mensajes anteriores.

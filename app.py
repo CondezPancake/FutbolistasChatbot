@@ -19,12 +19,7 @@ from almacenamiento import (
     crear_registro,
     guardar_opinion,
 )
-from analisis import (
-    ErrorAnalisis,
-    ErrorEntradaAnalisis,
-    analizar_opinion,
-    responder_pregunta,
-)
+from analisis import ErrorAnalisis, ErrorEntradaAnalisis, analizar_opinion
 from configuracion import (
     ErrorConfiguracionIA,
     cargar_configuracion_ia,
@@ -53,18 +48,11 @@ class Vista(str, Enum):
     CONSULTAR = "Consultar opiniones"
 
 
-class ModoMensaje(str, Enum):
-    """Acciones disponibles dentro de la conversación."""
-
-    OPINAR = "Compartir opinión"
-    PREGUNTAR = "Hacer pregunta"
-
-
 MENSAJE_BIENVENIDA = {
     "role": "assistant",
     "content": (
-        "Selecciona un futbolista. Puedes compartir una opinión para analizarla "
-        "y guardarla, o hacer una pregunta informativa que no se persistirá."
+        "Selecciona un futbolista y comparte tu opinión. "
+        "Analizaré únicamente el mensaje que envíes."
     ),
     "tipo": "bienvenida",
     "jugador_id": None,
@@ -82,19 +70,13 @@ def inicializar_estado_interfaz() -> None:
     vistas_validas = {vista.value for vista in Vista}
     if st.session_state.get("vista_activa") not in vistas_validas:
         st.session_state.vista_activa = Vista.EMITIR.value
-    modos_validos = {modo.value for modo in ModoMensaje}
-    if st.session_state.get("modo_mensaje") not in modos_validos:
-        st.session_state.modo_mensaje = ModoMensaje.OPINAR.value
     if not isinstance(st.session_state.get("historial_chat"), list):
         st.session_state.historial_chat = crear_historial_inicial()
-    if not isinstance(st.session_state.get("jugador_conversacion_id"), str):
-        st.session_state.jugador_conversacion_id = None
 
 
 def reiniciar_conversacion() -> None:
-    """Limpia el chat y permite seleccionar otro jugador sin borrar archivos."""
+    """Limpia únicamente el chat conservado en la sesión actual."""
     st.session_state.historial_chat = crear_historial_inicial()
-    st.session_state.jugador_conversacion_id = None
 
 
 def cargar_estilos() -> None:
@@ -131,17 +113,10 @@ def mostrar_estado_gemini() -> None:
 
 
 def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
-    """Selecciona sin escritura y bloquea el jugador durante la conversación."""
+    """Selecciona mediante opciones cerradas y conserva el identificador interno."""
     jugadores_por_id = {jugador["id"]: jugador for jugador in jugadores}
-    jugador_bloqueado_id = st.session_state.jugador_conversacion_id
-    if jugador_bloqueado_id not in jugadores_por_id:
-        jugador_bloqueado_id = None
-        st.session_state.jugador_conversacion_id = None
-
     jugador_estado = st.session_state.get("jugador_seleccionado_id")
-    if jugador_bloqueado_id is not None:
-        st.session_state.jugador_seleccionado_id = jugador_bloqueado_id
-    elif jugador_estado not in jugadores_por_id:
+    if jugador_estado not in jugadores_por_id:
         st.session_state.jugador_seleccionado_id = next(iter(jugadores_por_id))
 
     with st.sidebar:
@@ -165,13 +140,7 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
                 f"{jugadores_por_id[identificador]['pais']}"
             ),
             key="jugador_seleccionado_id",
-            disabled=jugador_bloqueado_id is not None,
         )
-        if jugador_bloqueado_id is not None:
-            st.caption(
-                "El futbolista está fijado para esta conversación. "
-                "Pulsa “Nueva conversación” para cambiarlo."
-            )
         st.divider()
         st.radio(
             "Navegación principal",
@@ -245,10 +214,7 @@ def mostrar_historial_chat() -> None:
         avatar = "⚽" if rol == "assistant" else "👤"
         with st.chat_message(rol, avatar=avatar):
             if rol == "user" and mensaje.get("jugador_nombre"):
-                etiqueta = (
-                    "Pregunta" if mensaje.get("tipo") == "pregunta" else "Opinión"
-                )
-                st.caption(f"{etiqueta} sobre {mensaje['jugador_nombre']}")
+                st.caption(f"Opinión sobre {mensaje['jugador_nombre']}")
             st.markdown(contenido)
 
 
@@ -260,7 +226,6 @@ def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
     if len(opinion) > LONGITUD_MAXIMA_OPINION:
         return "La opinión no puede superar los 1000 caracteres."
 
-    st.session_state.jugador_conversacion_id = jugador["id"]
     mensaje_usuario = {
         "role": "user",
         "content": opinion,
@@ -340,51 +305,6 @@ def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
     return None
 
 
-def procesar_pregunta(jugador: dict[str, Any], texto: str) -> str | None:
-    """Responde sobre el jugador sin clasificar ni persistir el mensaje."""
-    pregunta = texto.strip()
-    if len(pregunta) < LONGITUD_MINIMA_OPINION:
-        return "La pregunta debe contener al menos 5 caracteres útiles."
-    if len(pregunta) > LONGITUD_MAXIMA_OPINION:
-        return "La pregunta no puede superar los 1000 caracteres."
-
-    st.session_state.jugador_conversacion_id = jugador["id"]
-    st.session_state.historial_chat.append(
-        {
-            "role": "user",
-            "content": pregunta,
-            "tipo": "pregunta",
-            "jugador_id": jugador["id"],
-            "jugador_nombre": jugador["nombre"],
-        }
-    )
-
-    try:
-        with st.spinner("Gemini está preparando una respuesta breve..."):
-            respuesta = responder_pregunta(jugador, pregunta)
-    except (ErrorAnalisis, ErrorEntradaAnalisis) as exc:
-        contenido = (
-            "⚠️ **No fue posible responder la pregunta.**\n\n"
-            f"{exc}\n\n"
-            "_Tu pregunta permanece en esta conversación y no fue guardada._"
-        )
-        tipo = "error_pregunta"
-    else:
-        contenido = f"{respuesta}\n\n_Respuesta informativa; no se guardó como opinión._"
-        tipo = "respuesta_pregunta"
-
-    st.session_state.historial_chat.append(
-        {
-            "role": "assistant",
-            "content": contenido,
-            "tipo": tipo,
-            "jugador_id": jugador["id"],
-            "jugador_nombre": jugador["nombre"],
-        }
-    )
-    return None
-
-
 def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
     """Construye la entrada visual de la experiencia conversacional."""
     mostrar_encabezado()
@@ -393,36 +313,22 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
         """
         <section class="tg-view-intro">
           <span class="tg-view-intro__eyebrow">Emitir opinión</span>
-          <h2>Opina o pregunta sobre el futbolista.</h2>
+          <h2>¿Qué lectura tienes de su juego?</h2>
           <p>
-            Las opiniones se clasifican y guardan. Las preguntas reciben una
-            respuesta informativa, pero nunca se almacenan como opiniones.
+            Escribe entre 5 y 1000 caracteres. Cada envío conserva el futbolista
+            seleccionado en ese momento y no mezcla comentarios anteriores.
           </p>
         </section>
         """,
         unsafe_allow_html=True,
     )
-    modo = st.radio(
-        "¿Qué quieres hacer?",
-        options=[modo.value for modo in ModoMensaje],
-        key="modo_mensaje",
-        horizontal=True,
-    )
     mostrar_historial_chat()
-    marcador = (
-        f"Escribe tu opinión sobre {jugador['nombre']}"
-        if modo == ModoMensaje.OPINAR.value
-        else f"Pregunta algo sobre {jugador['nombre']}"
-    )
-    mensaje = st.chat_input(
-        marcador,
+    opinion = st.chat_input(
+        f"Escribe tu opinión sobre {jugador['nombre']}",
         max_chars=LONGITUD_MAXIMA_OPINION,
     )
-    if mensaje is not None:
-        if modo == ModoMensaje.OPINAR.value:
-            error = procesar_opinion(jugador, mensaje)
-        else:
-            error = procesar_pregunta(jugador, mensaje)
+    if opinion is not None:
+        error = procesar_opinion(jugador, opinion)
         if error:
             st.error(error)
         else:
