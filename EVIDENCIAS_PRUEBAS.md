@@ -45,9 +45,27 @@ sin navegador externo y sin utilizar la API de Gemini:
   utiliza esa versión.
 - AppTest informó que se ejecutaba sin `ScriptRunContext`, comportamiento esperado
   en su modo de prueba aislado. La aplicación no presentó excepciones.
-- La clasificación real con Gemini no se evaluó en este bloque para no consumir
-  cuota ni depender de una clave local. El flujo se comprobó previamente con
-  respuestas estructuradas simuladas.
+- Las pruebas automatizadas no llaman servicios externos. La validación real de
+  Gemini se ejecutó una sola vez y se documenta en la sección siguiente.
+
+## Evidencia real de Gemini
+
+Se realizó una única solicitud con `gemini-3.5-flash` y nivel de razonamiento
+`low`, sin guardar el resultado:
+
+| Campo | Valor observado |
+| --- | --- |
+| Jugador | Lionel Messi |
+| Opinión | «Qué precisión: falló todos los pases fáciles» |
+| `es_pertinente` | `true` |
+| `sentimiento` | `negativo` |
+| Razón | Identificó que el elogio literal contrasta irónicamente con la crítica por fallar pases sencillos |
+| Contrato | Objeto `AnalisisOpinion` validado por Pydantic |
+| Solicitudes realizadas | 1 |
+| Persistencia | No se guardó; SHA-256 de `opiniones.json` sin cambios |
+
+La respuesta coincide con el caso de aceptación de ironía. La clave se leyó
+desde `.env` y no se registró en salidas, documentación ni Git.
 
 ## Evidencia de Docker y persistencia
 

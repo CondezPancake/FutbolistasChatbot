@@ -7,6 +7,10 @@ interfaz conversacional, prompt con roles, salida estructurada, persistencia JSO
 consulta filtrada, manejo de errores y pruebas prioritarias. Los desafíos de
 ampliación del documento no forman parte del entregable base.
 
+La integración se comprobó además con una llamada real y mínima a Gemini sobre
+un caso irónico. El resultado negativo fue pertinente, estructurado y coherente
+con el criterio esperado, sin alterar el archivo persistente.
+
 ## Actividades de implementación
 
 | Actividad | Evidencia | Estado |

@@ -15,7 +15,8 @@ persistente. El chat conserva mensajes durante la sesión e invoca una cadena de
 Gemini con salida estructurada. El archivo de opiniones se carga bajo un esquema
 validado. Los análisis pertinentes se convierten en registros completos y se
 guardan de forma atómica. La consulta permite combinar filtros, revisar recuentos
-y descargar exactamente los resultados visibles.
+y descargar exactamente los resultados visibles. El entregable obligatorio está
+completo y cuenta con evidencia local, Docker y una llamada real mínima a Gemini.
 
 ## Gemini y salida estructurada
 
