@@ -48,3 +48,21 @@ sin navegador externo y sin utilizar la API de Gemini:
 - La clasificación real con Gemini no se evaluó en este bloque para no consumir
   cuota ni depender de una clave local. El flujo se comprobó previamente con
   respuestas estructuradas simuladas.
+
+## Evidencia de Docker y persistencia
+
+La imagen se construyó desde cero con Python 3.13 y el servicio se dejó activo en
+`http://localhost:8501`.
+
+| Comprobación | Resultado observado |
+| --- | --- |
+| Construcción | Imagen `futbolistaschatbot-tribuna-global` creada correctamente |
+| Salud inicial | `HTTP 200` y cuerpo `ok` |
+| Registros antes del reinicio | 12 |
+| Reinicio | `docker compose restart` completado |
+| Salud después del reinicio | `HTTP 200` y cuerpo `ok` |
+| Registros después del reinicio | 12 |
+| Integridad | SHA-256 sin cambios: `D575BFE458ABD75B7CF866AB917F7FF968F585F50AFAF1BE75EBDEAEF8F8C857` |
+
+El contenedor `tribuna-global-ia` quedó ejecutándose con el puerto `8501`
+publicado. El volumen `./data:/app/data` conservó las opiniones tras el reinicio.
