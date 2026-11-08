@@ -7,12 +7,14 @@ from typing import Any
 
 import streamlit as st
 
-from almacenamiento import ErrorCatalogo, cargar_jugadores
+from almacenamiento import ErrorCatalogo, ErrorOpiniones, cargar_jugadores, cargar_opiniones
+from analisis import ErrorAnalisis, ErrorEntradaAnalisis, analizar_opinion
 from configuracion import gemini_esta_configurado
 
 
 DIRECTORIO_PROYECTO = Path(__file__).resolve().parent
 RUTA_JUGADORES = DIRECTORIO_PROYECTO / "data" / "jugadores.json"
+RUTA_OPINIONES = DIRECTORIO_PROYECTO / "data" / "opiniones.json"
 RUTA_ESTILOS = DIRECTORIO_PROYECTO / "styles.css"
 LONGITUD_MINIMA_OPINION = 5
 LONGITUD_MAXIMA_OPINION = 1000
@@ -66,6 +68,11 @@ def cargar_estilos() -> None:
 def cargar_catalogo_aplicacion() -> list[dict[str, Any]]:
     """Carga el catálogo una vez mientras el archivo no cambie."""
     return cargar_jugadores(RUTA_JUGADORES)
+
+
+def cargar_opiniones_aplicacion() -> dict[str, Any]:
+    """Recupera y valida el archivo persistente sin modificarlo."""
+    return cargar_opiniones(RUTA_OPINIONES)
 
 
 def mostrar_estado_gemini() -> None:
@@ -186,8 +193,8 @@ def mostrar_historial_chat() -> None:
             st.markdown(contenido)
 
 
-def agregar_opinion_al_historial(jugador: dict[str, Any], texto: str) -> str | None:
-    """Valida el mensaje y captura el jugador seleccionado al enviarlo."""
+def procesar_opinion(jugador: dict[str, Any], texto: str) -> str | None:
+    """Captura el envío, solicita su análisis y conserva cualquier fallo."""
     opinion = texto.strip()
     if len(opinion) < LONGITUD_MINIMA_OPINION:
         return "La opinión debe contener al menos 5 caracteres útiles."
@@ -203,15 +210,39 @@ def agregar_opinion_al_historial(jugador: dict[str, Any], texto: str) -> str | N
             "jugador_nombre": jugador["nombre"],
         }
     )
+
+    try:
+        with st.spinner("Gemini está analizando únicamente este mensaje..."):
+            resultado = analizar_opinion(jugador, opinion)
+    except (ErrorAnalisis, ErrorEntradaAnalisis) as exc:
+        contenido = (
+            "⚠️ **No fue posible analizar la opinión.**\n\n"
+            f"{exc}\n\n"
+            "_Tu texto permanece en esta conversación y no fue guardado._"
+        )
+        tipo = "error_analisis"
+    else:
+        if resultado.es_pertinente:
+            sentimiento = str(resultado.sentimiento).capitalize()
+            contenido = (
+                f"**Sentimiento: {sentimiento}**\n\n"
+                f"{resultado.razon}\n\n"
+                "_Análisis validado. El guardado se conectará en el siguiente bloque._"
+            )
+            tipo = "analisis"
+        else:
+            contenido = (
+                "**Mensaje no pertinente**\n\n"
+                f"{resultado.razon}\n\n"
+                "_No se guardará como una opinión sobre el futbolista._"
+            )
+            tipo = "no_pertinente"
+
     st.session_state.historial_chat.append(
         {
             "role": "assistant",
-            "content": (
-                f"Recibí tu opinión sobre **{jugador['nombre']}**. "
-                "La clasificación con IA se conectará en el siguiente paso; "
-                "este mensaje todavía no se guardó en el archivo de opiniones."
-            ),
-            "tipo": "estado",
+            "content": contenido,
+            "tipo": tipo,
             "jugador_id": jugador["id"],
             "jugador_nombre": jugador["nombre"],
         }
@@ -242,14 +273,14 @@ def mostrar_vista_emitir(jugador: dict[str, Any]) -> None:
         max_chars=LONGITUD_MAXIMA_OPINION,
     )
     if opinion is not None:
-        error = agregar_opinion_al_historial(jugador, opinion)
+        error = procesar_opinion(jugador, opinion)
         if error:
             st.error(error)
         else:
             st.rerun()
 
 
-def mostrar_vista_consultar() -> None:
+def mostrar_vista_consultar(archivo_opiniones: dict[str, Any]) -> None:
     """Construye la entrada visual de la consulta persistente."""
     st.markdown(
         """
@@ -281,6 +312,9 @@ def mostrar_vista_consultar() -> None:
         """,
         unsafe_allow_html=True,
     )
+    st.caption(
+        f"Archivo validado: {len(archivo_opiniones['opiniones'])} opiniones disponibles."
+    )
 
 
 def main() -> None:
@@ -296,7 +330,8 @@ def main() -> None:
 
     try:
         jugadores = cargar_catalogo_aplicacion()
-    except ErrorCatalogo as exc:
+        archivo_opiniones = cargar_opiniones_aplicacion()
+    except (ErrorCatalogo, ErrorOpiniones) as exc:
         st.error(str(exc))
         st.stop()
 
@@ -305,7 +340,7 @@ def main() -> None:
     if st.session_state.vista_activa == Vista.EMITIR.value:
         mostrar_vista_emitir(jugador_seleccionado)
     else:
-        mostrar_vista_consultar()
+        mostrar_vista_consultar(archivo_opiniones)
 
 
 if __name__ == "__main__":

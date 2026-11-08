@@ -15,7 +15,7 @@ from pydantic import (
     model_validator,
 )
 
-from configuracion import ConfiguracionIA, cargar_configuracion_ia
+from configuracion import ConfiguracionIA, ErrorConfiguracionIA, cargar_configuracion_ia
 
 
 PROMPT_VERSION = "1.0"
@@ -209,6 +209,10 @@ def analizar_opinion(
     except ValidationError as exc:
         raise ErrorAnalisis(
             "Gemini devolvió un análisis con una estructura no válida. Intenta nuevamente."
+        ) from exc
+    except ErrorConfiguracionIA as exc:
+        raise ErrorAnalisis(
+            "Gemini no está configurado. Agrega una clave válida en el archivo .env."
         ) from exc
     except ErrorAnalisis:
         raise

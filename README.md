@@ -11,10 +11,10 @@ la aplicación.
 El repositorio contiene la estructura base, la configuración reproducible, los
 datos ficticios requeridos, el selector validado de futbolistas y la identidad
 visual responsive. La navegación separa la emisión de opiniones de la consulta
-persistente. El chat ya conserva mensajes durante la sesión; la clasificación
-cuenta con un prompt versionado, cliente Gemini y salida estructurada. La
-invocación segura, el manejo de errores y el guardado definitivo se implementarán
-en las siguientes actividades.
+persistente. El chat conserva mensajes durante la sesión e invoca una cadena de
+Gemini con salida estructurada. El archivo de opiniones se carga bajo un esquema
+validado. La creación y el guardado definitivo de nuevos registros corresponden
+al siguiente bloque.
 
 ## Gemini y salida estructurada
 
@@ -39,6 +39,11 @@ máximo 300 caracteres. La coherencia se valida después del esquema: una opini�
 pertinente requiere sentimiento y una no pertinente exige un valor nulo. La
 cadena usa `with_structured_output(..., method="json_schema")`.
 
+`analizar_opinion` normaliza y valida la entrada antes de invocar el modelo. Un
+fallo de configuración, proveedor o validación produce un mensaje seguro; los
+detalles internos y la clave nunca se muestran. La opinión queda visible en el
+chat y no se inventa una categoría de respaldo.
+
 ## Prompt de clasificación
 
 `analisis.py` define un `ChatPromptTemplate` con mensajes `system` y `human`.
@@ -52,7 +57,8 @@ La versión `1.0` establece:
 - tratamiento de la opinión como datos no confiables.
 
 La opinión se delimita dentro del mensaje humano y nunca se incorpora al mensaje
-del sistema. Esta etapa construye el prompt, pero todavía no consume la API.
+del sistema. Cada envío pertinente consume una llamada al modelo; las consultas
+del archivo no realizan llamadas a Gemini.
 
 ## Conversación de sesión
 
@@ -64,8 +70,18 @@ La sección **Emitir opinión** permite:
 - mantener el historial durante las reejecuciones de Streamlit;
 - iniciar una conversación nueva sin modificar `data/opiniones.json`.
 
-Las respuestas actuales indican claramente que el análisis y el guardado todavía
-no se han ejecutado; no se inventan clasificaciones provisionales.
+Las respuestas distinguen un análisis pertinente, un texto ajeno al futbolista y
+un fallo de Gemini. En este bloque el resultado aún no se guarda en el archivo.
+
+## Carga de opiniones
+
+`data/opiniones.json` se lee como un diccionario versionado. Cada registro valida
+UUID, fecha UTC, jugador, texto original, categoría, razón, modelo y versión del
+prompt. También se rechazan campos inesperados e identificadores repetidos.
+
+Si el archivo no existe, la aplicación trabaja con una estructura vacía en
+memoria. Si contiene JSON inválido o un esquema desconocido, muestra el error y
+conserva el archivo original sin reemplazarlo silenciosamente.
 
 ## Navegación
 
