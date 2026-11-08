@@ -2,10 +2,10 @@
 
 import json
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import (
     AwareDatetime,
@@ -16,6 +16,8 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+
+from analisis import PROMPT_VERSION, AnalisisOpinion
 
 
 class ErrorCatalogo(ValueError):
@@ -147,3 +149,33 @@ def cargar_opiniones(ruta: str | Path) -> dict[str, Any]:
         ) from exc
 
     return archivo.model_dump(mode="json")
+
+
+def crear_registro(
+    jugador: dict[str, Any],
+    texto: str,
+    analisis: AnalisisOpinion,
+    modelo: str,
+) -> dict[str, Any]:
+    """Crea un registro completo con metadatos generados por la aplicación."""
+    if not analisis.es_pertinente or analisis.sentimiento is None:
+        raise ErrorOpiniones("Una opinión no pertinente no puede convertirse en registro.")
+
+    try:
+        registro = OpinionPersistida.model_validate(
+            {
+                "id": uuid4(),
+                "fecha_utc": datetime.now(timezone.utc),
+                "jugador_id": jugador.get("id"),
+                "jugador_nombre": jugador.get("nombre"),
+                "opinion_original": texto,
+                "sentimiento": analisis.sentimiento,
+                "razon": analisis.razon,
+                "modelo": modelo,
+                "version_prompt": PROMPT_VERSION,
+            }
+        )
+    except (AttributeError, ValidationError) as exc:
+        raise ErrorOpiniones("No fue posible construir un registro de opinión válido.") from exc
+
+    return registro.model_dump(mode="json")
