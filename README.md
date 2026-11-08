@@ -153,6 +153,19 @@ jugador como valor interno.
 - Docker Compose 5 o posterior, opcional
 - Clave de Gemini API para las actividades de análisis
 
+## Versiones utilizadas
+
+| Componente | Versión |
+| --- | --- |
+| Python local | 3.15.0 |
+| Python en Docker | 3.13 |
+| Streamlit | 1.67.0 |
+| LangChain Core | 1.7.6 |
+| LangChain Google GenAI | 4.4.3 |
+| Pydantic | 2.14.3 |
+| Docker | 29.8.2 |
+| Docker Compose | 5.6.0 |
+
 ## Configuración local
 
 ```powershell
@@ -195,6 +208,9 @@ Actualmente contiene exactamente diez. El resultado observado y las
 comprobaciones de interfaz se documentan en
 [EVIDENCIAS_PRUEBAS.md](EVIDENCIAS_PRUEBAS.md).
 
+El cumplimiento punto por punto y la reflexión sobre ambigüedades están en
+[INFORME_ENTREGA.md](INFORME_ENTREGA.md).
+
 ## Estructura
 
 ```text
@@ -222,3 +238,29 @@ comprobaciones de interfaz se documentan en
 - Los errores de la API no se convierten en opiniones ni sentimientos neutros.
 - Los doce registros incluidos son ficticios y están identificados con el
   modelo `registro-ficticio`.
+
+## Paso a paso para ejecutar y demostrar el proyecto
+
+1. Abre PowerShell en la raíz del repositorio y confirma que estás en
+   `develop` con `git branch --show-current`.
+2. Crea el entorno con `python -m venv .venv`.
+3. Actívalo con `.\.venv\Scripts\Activate.ps1`.
+4. Instala las dependencias mediante
+   `python -m pip install -r requirements-dev.txt`.
+5. Copia la plantilla con `Copy-Item .env.example .env` y configura dentro de
+   `.env` una clave nueva en `GOOGLE_API_KEY`; nunca la publiques ni la pegues
+   en capturas o commits.
+6. Ejecuta `pytest` y confirma que las 10 pruebas terminan aprobadas.
+7. Inicia localmente con `streamlit run app.py` y abre
+   `http://localhost:8501`.
+8. En **Emitir opinión**, selecciona un jugador, envía un texto y comprueba que
+   la confirmación aparece solamente después del guardado.
+9. En **Consultar opiniones**, combina los filtros, compara tabla y recuentos y
+   descarga `opiniones_filtradas.json`.
+10. Para la demostración con Docker ejecuta `docker compose up --build -d`,
+    consulta `http://localhost:8501`, revisa el estado con `docker compose ps`
+    y los logs con `docker compose logs --tail 50`.
+11. Reinicia con `docker compose restart`, vuelve a consultar las opiniones y
+    verifica que `data/opiniones.json` conserva los registros.
+12. Cuando termines la demostración, detén el servicio con
+    `docker compose down`.
