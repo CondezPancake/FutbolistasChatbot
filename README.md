@@ -14,8 +14,8 @@ visual responsive. La navegación separa la emisión de opiniones de la consulta
 persistente. El chat conserva mensajes durante la sesión e invoca una cadena de
 Gemini con salida estructurada. El archivo de opiniones se carga bajo un esquema
 validado. Los análisis pertinentes se convierten en registros completos y se
-guardan de forma atómica; las consultas y filtros corresponden al siguiente
-bloque.
+guardan de forma atómica. La consulta permite combinar filtros, revisar recuentos
+y descargar exactamente los resultados visibles.
 
 ## Gemini y salida estructurada
 
@@ -109,6 +109,16 @@ La barra lateral conserva dos recorridos independientes:
 La vista activa se conserva en `st.session_state` durante las reejecuciones de
 Streamlit y se restablece de forma segura si contiene un valor desconocido.
 
+## Consulta de opiniones
+
+La sección **Consultar opiniones** permite seleccionar todos los jugadores o uno
+específico y combinarlo con todos los sentimientos o una categoría. La tabla
+muestra fecha UTC, jugador, opinión original, sentimiento y razón. El total y los
+cuatro recuentos se calculan sobre el mismo resultado filtrado.
+
+La descarga genera `opiniones_filtradas.json` con únicamente los registros que
+aparecen en pantalla. Cambiar filtros no invoca Gemini ni modifica el archivo.
+
 ## Identidad visual
 
 Tribuna Global IA utiliza una interfaz conversacional oscura inspirada en la
@@ -181,6 +191,9 @@ pytest
 ```
 
 La suite tendrá un máximo de diez pruebas prioritarias de funcionamiento.
+Actualmente contiene exactamente diez. El resultado observado y las
+comprobaciones de interfaz se documentan en
+[EVIDENCIAS_PRUEBAS.md](EVIDENCIAS_PRUEBAS.md).
 
 ## Estructura
 
