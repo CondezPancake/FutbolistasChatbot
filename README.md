@@ -76,9 +76,11 @@ Las respuestas distinguen un análisis pertinente, un texto ajeno al futbolista,
 un fallo de Gemini y un fallo de escritura. La confirmación de guardado aparece
 únicamente después de reemplazar correctamente el archivo persistente.
 
-El futbolista se elige mediante opciones cerradas, sin campo de escritura. Puede
+El selector muestra únicamente el futbolista actual. Al hacer clic despliega la
+lista completa como opciones de selección única, sin campo de escritura. Puede
 cambiarse antes de cada envío; los mensajes anteriores conservan el jugador que
-estaba seleccionado cuando fueron enviados.
+estaba seleccionado cuando fueron enviados. El filtro de consultas utiliza el
+mismo patrón desplegable.
 
 ## Carga de opiniones
 

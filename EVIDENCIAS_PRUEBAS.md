@@ -91,6 +91,6 @@ Después de utilizar la aplicación y añadir una opinión real, la suite se aju
 para verificar el mínimo exigido de 12 registros sin asumir que el archivo nunca
 crecerá. El resultado continuó en **10 aprobadas, 0 fallidas**.
 
-También se comprobó que los futbolistas se eligen mediante opciones cerradas,
-sin entrada de texto, tanto en el chat como en la vista de consultas. Cambiar la
-selección no altera el jugador asociado a los mensajes anteriores.
+También se comprobó que cada selector muestra solo el jugador actual y abre las
+opciones al hacer clic, sin entrada de texto, tanto en el chat como en consultas.
+La selección es única y cambiarla no altera el jugador de mensajes anteriores.

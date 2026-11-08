@@ -132,15 +132,21 @@ def seleccionar_jugador(jugadores: list[dict[str, Any]]) -> dict[str, Any]:
             """,
             unsafe_allow_html=True,
         )
-        jugador_id = st.radio(
-            "Futbolista",
-            options=list(jugadores_por_id),
-            format_func=lambda identificador: (
-                f"{jugadores_por_id[identificador]['nombre']} · "
-                f"{jugadores_por_id[identificador]['pais']}"
-            ),
-            key="jugador_seleccionado_id",
-        )
+        jugador_actual = jugadores_por_id[st.session_state.jugador_seleccionado_id]
+        st.caption("Futbolista")
+        with st.popover(
+            f"⚽ {jugador_actual['nombre']} · {jugador_actual['pais']}",
+            width="stretch",
+        ):
+            jugador_id = st.radio(
+                "Selecciona un futbolista",
+                options=list(jugadores_por_id),
+                format_func=lambda identificador: (
+                    f"{jugadores_por_id[identificador]['nombre']} · "
+                    f"{jugadores_por_id[identificador]['pais']}"
+                ),
+                key="jugador_seleccionado_id",
+            )
         st.divider()
         st.radio(
             "Navegación principal",
@@ -362,20 +368,27 @@ def mostrar_vista_consultar(
     )
     columna_jugador, columna_sentimiento = st.columns(2)
     with columna_jugador:
-        jugador_filtro = st.pills(
-            "Jugador",
-            options=["todos", *jugadores_por_id],
-            default="todos",
-            required=True,
-            format_func=lambda valor: (
-                "Todos los jugadores"
-                if valor == "todos"
-                else jugadores_por_id[valor]["nombre"]
-            ),
-            key="filtro_jugador",
-            width="stretch",
-            wrap=True,
+        opciones_jugador = ["todos", *jugadores_por_id]
+        jugador_filtro_estado = st.session_state.get("filtro_jugador_id")
+        if jugador_filtro_estado not in opciones_jugador:
+            st.session_state.filtro_jugador_id = "todos"
+        etiqueta_jugador = (
+            "Todos los jugadores"
+            if st.session_state.filtro_jugador_id == "todos"
+            else jugadores_por_id[st.session_state.filtro_jugador_id]["nombre"]
         )
+        st.caption("Jugador")
+        with st.popover(f"⚽ {etiqueta_jugador}", width="stretch"):
+            jugador_filtro = st.radio(
+                "Filtrar por jugador",
+                options=opciones_jugador,
+                format_func=lambda valor: (
+                    "Todos los jugadores"
+                    if valor == "todos"
+                    else jugadores_por_id[valor]["nombre"]
+                ),
+                key="filtro_jugador_id",
+            )
         jugador_id = None if jugador_filtro == "todos" else jugador_filtro
     with columna_sentimiento:
         sentimiento = st.selectbox(
